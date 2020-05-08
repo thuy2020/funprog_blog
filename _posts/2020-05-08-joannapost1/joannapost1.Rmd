@@ -46,20 +46,49 @@ plots1$plots[2]
 
 ```{r adding unique title to each plot with country name}
 
-plots_parks1 <- d %>%
+# adding labels and unique title: 
+plots_workplaces1 <- d %>%
   group_by(country) %>% 
     nest() %>%
     mutate(plots = pmap(list(country, data),
-    ~ggplot(..2, aes(date, parks)) +
+    ~ggplot(..2, aes(date, workplaces)) +
       geom_point() + 
       geom_line() + 
-      labs(title = glue("Mobility trends for parks in {..1}"),
+      labs(title = glue("Mobility trends for workplaces in {..1}"),
            x = "Date", 
            y = "% change")))
 
 # testing: 
-plots_parks1$plots[1]
-plots_parks1$plots[2]
+plots_workplaces1$plots[1]
+plots_workplaces1$plots[2]
+
+```
+
+```{r collapsing mobility across place categories}
+
+# Let's collapse across place categories to get total mobility for each day, in each country:
+d <- d %>%
+  mutate(total_mob = rowSums(.[4:9]))
+
+# take a quick look at total mobility data for one country, just to make sure the rowSums worked like we'd expect: 
+d %>% 
+  filter(country == "Argentina") %>%
+  ggplot(aes(date, total_mob)) +
+  geom_point()
+
+plots_allplaces <- d %>%
+  group_by(country) %>% 
+    nest() %>%
+    mutate(plots = pmap(list(country, data),
+    ~ggplot(..2, aes(date, total_mob)) +
+      geom_point() + 
+      geom_line() + 
+      labs(title = glue("Overal mobility trends in {..1}"),
+           x = "Date", 
+           y = "% change")))
+
+plots_allplaces$plots[1]
+plots_allplaces$plots[10]
 
 ```
 
