@@ -92,3 +92,34 @@ plots_allplaces$plots[10]
 
 ```
 
+```{r how mobility relates to infection rates}
+
+# what does the relationship between total mobility and total cases look like?
+
+plot(total_cases ~ total_mob, data = d, col=2)
+
+# fitting linear model:
+lm_total_mob <- lm(total_mob ~ total_cases, data = d)
+
+# view output:
+summary(lm_total_mob)
+
+# total mobility by country: 
+d %>%
+  ggplot(aes(date, total_mob)) +
+  geom_line() +
+  facet_wrap(~ country)
+
+# one way to plot lm, this is for all countries together: 
+plot(total_mob ~ total_cases, data = d)
+abline(lm_total_mob)
+
+# looking at the lm by country: 
+ggplot(d, aes(x = total_cases, y = total_mob)) + 
+  geom_point() +
+  stat_smooth(method = "lm", col = "red") +
+  facet_wrap(~ country)
+# ugly plots, but illustrates the varying degrees of steepness which which mobility declined as # of total cases increased.  
+
+```
+
