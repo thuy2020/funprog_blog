@@ -12,8 +12,22 @@
     "date": "2020-05-08",
     "categories": [],
     "preview": {},
-    "last_modified": "2020-05-08T11:04:03-07:00",
-    "input_file": {}
+    "last_modified": "2020-05-08T11:04:01-07:00"
+  },
+  {
+    "path": "posts/2020-05-08-joannapost1/",
+    "title": "joanna_post1",
+    "description": "A short description of the post.",
+    "author": [
+      {
+        "name": "Joanna Wright",
+        "url": "https://example.com/norajones"
+      }
+    ],
+    "date": "2020-05-08",
+    "categories": [],
+    "preview": {},
+    "last_modified": "2020-05-08T14:24:29-07:00"
   },
   {
     "path": "posts/2020-05-08-stephaniepost/",
@@ -28,8 +42,7 @@
     "date": "2020-05-08",
     "categories": [],
     "preview": {},
-    "last_modified": "2020-05-08T11:05:15-07:00",
-    "input_file": {}
+    "last_modified": "2020-05-08T11:10:21-07:00"
   },
   {
     "path": "posts/welcome/",
@@ -38,13 +51,12 @@
     "author": [
       {
         "name": "Nora Jones",
-        "url": "https://example.com/norajones"
+        "url": "https://s-gluck.github.io/funprog_blog"
       }
     ],
     "date": "2020-05-08",
     "categories": [],
     "preview": {},
-    "last_modified": "2020-05-08T10:27:04-07:00",
-    "input_file": {}
+    "last_modified": "2020-05-08T14:28:12-07:00"
   }
 ]
