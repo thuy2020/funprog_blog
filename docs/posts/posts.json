@@ -1,5 +1,21 @@
 [
   {
+    "path": "posts/2020-05-08-akhilas-first-post/",
+    "title": "Akhila's First Post",
+    "description": "A short description of the post.",
+    "author": [
+      {
+        "name": "Akhila Nekkanti",
+        "url": "https://example.com/norajones"
+      }
+    ],
+    "date": "2020-05-08",
+    "categories": [],
+    "preview": {},
+    "last_modified": "2020-05-08T11:04:03-07:00",
+    "input_file": {}
+  },
+  {
     "path": "posts/2020-05-08-stephaniepost/",
     "title": "stephanie_post",
     "description": "A short description of the post.",
@@ -12,7 +28,7 @@
     "date": "2020-05-08",
     "categories": [],
     "preview": {},
-    "last_modified": "2020-05-08T10:57:29-07:00",
+    "last_modified": "2020-05-08T11:05:15-07:00",
     "input_file": {}
   },
   {
@@ -28,23 +44,7 @@
     "date": "2020-05-08",
     "categories": [],
     "preview": {},
-    "last_modified": "2020-05-08T10:43:14-07:00",
+    "last_modified": "2020-05-08T10:27:04-07:00",
     "input_file": {}
-  },
-  {
-    "path": "posts/2020-05-08-akhilas-first-post/",
-    "title": "Akhila's First Post",
-    "description": "A short description of the post.",
-    "author": [
-      {
-        "name": "Akhila Nekkanti",
-        "url": "https://example.com/norajones"
-      }
-    ],
-    "date": "2020-05-08",
-    "categories": [],
-    "preview": {},
-    "last_modified": "2020-05-08T10:59:10-07:00",
-    "input_file": "akhilas-first-post.utf8.md"
   }
 ]
