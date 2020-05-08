@@ -22,12 +22,25 @@ library(janitor)
 ```
 
 ```{r}
-
 files <- list.files(here::here("data"),
                     full.names = TRUE)
 files
 d <- read_csv(files[1]) %>%
   clean_names()
+```
+
+```{r trying out parallel iteration, parks mobility trends}
+
+plots1 <- d %>% 
+  group_by(country) %>% 
+  nest() %>% 
+  mutate(plots = pmap(list(country, data),
+                      ~ggplot(..2, aes(date, parks)) +
+                        geom_point() + 
+                        geom_line()))
+
+plots1$plots[1]
+plots1$plots[2]
 
 ```
 
