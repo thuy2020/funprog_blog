@@ -22,6 +22,18 @@ To create a new page on your blog
 `distill::create_post("post_title")`
 
 
+To tackle the outline: 
+
+1) Set up a working directory complete with an Rproject and subfolders - Brock
+ 
+2) Subsetting data and outputting basic descriptives - Akhila & Stephanie 
+
+3) Loop through regression/other stats models to extract plots - Joanna
+
+4) Creating folders to export plots with meaningful paramters (e.g., names, plot dimensions) - Akhila & Stephanie 
+
+
+
 Distill is a publication format for scientific and technical writing, native to the web.
 
 Learn more about using Distill at <https://rstudio.github.io/distill>.
