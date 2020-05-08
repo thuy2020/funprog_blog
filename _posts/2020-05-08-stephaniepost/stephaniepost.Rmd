@@ -1,0 +1,28 @@
+---
+title: "stephanie_post"
+description: |
+  A short description of the post.
+author:
+  - name: Nora Jones
+    url: https://example.com/norajones
+date: 05-08-2020
+output:
+  distill::distill_article:
+    self_contained: false
+---
+
+```{r setup, include= TRUE}
+knitr::opts_chunk$set(echo = FALSE)
+
+
+
+```
+
+To create a new page on your blog 
+`distill::create_post("post_title")`
+
+
+Distill is a publication format for scientific and technical writing, native to the web.
+
+Learn more about using Distill at <https://rstudio.github.io/distill>.
+
