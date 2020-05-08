@@ -44,4 +44,23 @@ plots1$plots[2]
 
 ```
 
+```{r adding unique title to each plot with country name}
+
+pd_jw <- d %>%
+  mutate(title = glue("Mobility trends in {(country)}")) %>%
+    group_by(country, title) %>% 
+    nest()
+
+plots_parks1 <- pd_jw %>%
+    mutate(plots = pmap(list(country, title, data),
+    ~ggplot(..3, aes(date, parks)) +
+      geom_point() + 
+      geom_line() + 
+      labs(title = ..2),
+             x = "Date"))
+
+plots_parks1$plots[1]
+plots_parks1$plots[2]
+
+```
 
