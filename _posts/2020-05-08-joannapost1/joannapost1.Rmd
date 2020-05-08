@@ -13,9 +13,22 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+
+library(ggplot2)
+library(tidyverse)
+library(glue)
+library(janitor)
+
 ```
 
-Distill is a publication format for scientific and technical writing, native to the web.
+```{r}
 
-Learn more about using Distill at <https://rstudio.github.io/distill>.
+files <- list.files(here::here("data"),
+                    full.names = TRUE)
+files
+d <- read_csv(files[1]) %>%
+  clean_names()
+
+```
+
 
