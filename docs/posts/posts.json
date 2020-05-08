@@ -14,5 +14,21 @@
     "preview": {},
     "last_modified": "2020-05-08T10:27:04-07:00",
     "input_file": {}
+  },
+  {
+    "path": "posts/2020-05-08-stephaniepost/",
+    "title": "stephanie_post",
+    "description": "A short description of the post.",
+    "author": [
+      {
+        "name": "Nora Jones",
+        "url": "https://example.com/norajones"
+      }
+    ],
+    "date": "2020-05-08",
+    "categories": [],
+    "preview": {},
+    "last_modified": "2020-05-08T10:55:54-07:00",
+    "input_file": "stephaniepost.utf8.md"
   }
 ]
