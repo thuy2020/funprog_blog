@@ -11,6 +11,8 @@ output:
     self_contained: false
 ---
 
+Note: this is just a draft, trying out executing some ideas. Will edit to show code as appropriate and function as a tutorial. 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 
@@ -18,6 +20,7 @@ library(ggplot2)
 library(tidyverse)
 library(glue)
 library(janitor)
+library(purrr)
 
 ```
 
@@ -122,4 +125,34 @@ ggplot(d, aes(x = total_cases, y = total_mob)) +
 # ugly plots, but illustrates the varying degrees of steepness which which mobility declined as # of total cases increased.  
 
 ```
+
+```{r fit separate models by country, extracting }
+
+# returns nested lists: 
+lm_by_country_lists <- d %>% 
+  split(.$country) %>% 
+  map(~lm(total_mob ~ total_cases, data = .))
+
+# extracting r squared 
+lm_by_country_lists %>% 
+  map(summary) %>% 
+  map_dbl(~.$r.squared) # tilda and . to loop through each country list and extract r squared
+
+# or could extract r squared by naming: 
+lm_by_country_lists %>% 
+  map(summary) %>% 
+  map_dbl("r.squared")
+
+# OR, a different approach, returns data frame: 
+lm_by_country_df <- split(d, d$country) %>%
+     map_df(~lm(total_mob ~ total_cases, .x) %>%
+              broom::tidy(),
+            .id = "year")
+
+# summary of data frame:  
+lm_by_country_df %>%
+  map(summary)
+
+```
+
 
