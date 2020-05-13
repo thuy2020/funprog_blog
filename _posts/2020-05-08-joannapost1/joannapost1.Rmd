@@ -122,11 +122,10 @@ ggplot(d, aes(x = total_cases, y = total_mob)) +
   geom_point() +
   stat_smooth(method = "lm", col = "red") +
   facet_wrap(~ country)
-# ugly plots, but illustrates the varying degrees of steepness which which mobility declined as # of total cases increased.  
 
 ```
 
-```{r fit separate models by country, extracting }
+```{r fit separate linear models by country, extracting }
 
 # returns nested lists: 
 lm_by_country_lists <- d %>% 
