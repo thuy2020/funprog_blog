@@ -22,5 +22,26 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ```
 
+Criteria for project:
+
+1) No code is used repetitively (no more than twice) [10 points]
+
+2) More than one variant of purrr::map is used [10 points]
+
+3) At least one {purrr} function outside the basic map family (walk_*, reduce, modify_*, etc.) [10 points]
+
+4) At least one instance of parallel iteration (e.g., map2_*, pmap_*) [10 points]
+
+5) At least one use case of purrr::nest %>% mutate() [10 points]
+
+6) At least two custom functions [20 points; 10 points each].
+Each function must do exactly one thing. 
+The functions may replicate the behavior of a base function - as noted above this is about practicing the skills you learn in class. 
+
+7) Code is fully reproducible and housed on GitHub [10 points]
+
+8) No obvious errors in chosen output format [10 points]
+
+9) Deployed on the web and shareable through a link [10 points]
 
 
