@@ -1,7 +1,7 @@
 ---
 title: "joanna_post1"
 description: |
-  A short description of the post.
+  Description here
 author:
   - name: Joanna Wright
     url: https://example.com/norajones
@@ -11,10 +11,11 @@ output:
     self_contained: false
 ---
 
-Note: this is just a draft, trying out executing some ideas. Will edit to show code as appropriate and function as a tutorial. 
+This post describes examples of iteration and parallel iteraction to loop through a data set to extract particular information and create plots. It also demonstrates the use of writing functions. 
 
+I used these libraries: 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
 
 library(ggplot2)
 library(tidyverse)
@@ -24,17 +25,36 @@ library(purrr)
 
 ```
 
-```{r}
+Here's how I loaded the data. For details on loading data, see [Brock's post](link here).
+
+```{r loading the data}
+
 files <- list.files(here::here("data"),
                     full.names = TRUE)
 files
 d <- read_csv(files[1]) %>%
   clean_names()
+
 ```
+
+### Plot iteration 
+Let's say we want to create a separate plot for each country, for mobility trends in a particular category. For this example, we'll use parks. First, we need to `group_by` country and `nest()` the rest of the data. This creates a list of tibbles, one for each country. I've called `head()` here so that we can see what the first few rows look like. 
+
+```{r}
+
+d %>%
+  group_by(country) %>% 
+  nest() %>%
+  head()
+
+```
+
+Now we can use this as the input for our plots. `pmap()` is a variation of `map()` which allows us to iteratively apply a function over multiple vectors simultaneously. 
+
 
 ```{r trying out parallel iteration, parks mobility trends}
 
-plots1 <- d %>% 
+plots1 <- d %>%
   group_by(country) %>% 
   nest() %>% 
   mutate(plots = pmap(list(country, data),
