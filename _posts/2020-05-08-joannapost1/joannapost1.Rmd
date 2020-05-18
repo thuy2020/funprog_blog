@@ -15,21 +15,26 @@ This post describes examples of iteration and parallel iteration to loop through
 
 ## Set-up
 
-I used these libraries: 
-```{r setup, include=FALSE}
+```{r setup }
 knitr::opts_chunk$set(echo = TRUE)
 
+```
+
+<aside>
+Libraries for this post
+</aside>
+```{r}
 library(ggplot2)
 library(tidyverse)
 library(glue)
 library(janitor)
 library(purrr)
-
 ```
+
 
 Here's how I loaded the data. For details on loading data, see [Brock's post](link here).
 
-```{r loading the data}
+```{r loading the data, results='hide'}
 
 files <- list.files(here::here("data"),
                     full.names = TRUE)
@@ -56,11 +61,11 @@ Now we can use this as the input for our plots. `pmap()` is a variation of `map(
 
 ```{r parallel iteration, workplaces mobility trends for each country}
 
-plots_workplaces <- d %>% # assign to an object
+plots_workplaces <- d %>%
   group_by(country) %>% 
   nest() %>% 
-  mutate(plots = pmap(list(country, data), # call columns "country" and "data" as inputs, create new column for plots  
-                      ~ggplot(..2, aes(date, workplaces)) + # ..2 to select 2nd column for plot data
+  mutate(plots = pmap(list(country, data),  
+                      ~ggplot(..2, aes(date, workplaces)) +
                         geom_point() + 
                         geom_line()))
 
@@ -115,33 +120,33 @@ plots_allplaces$plots[10]
 
 ```
 
-Some final adjustments to the plots
-```{r data viz improvements}
+## How do infection rates relate to mobility trends, by country?   
+Fitting a linear model to see how mobility changed as infection rate changed in each country: 
 
+```{r results="hide"}
 
+lm_by_country_lists <- d %>% 
+  split(.$country) %>% # split into separate tbl for each country
+  map(~lm(total_mob ~ total_cases, data = .)) # for each tbl, fit lm
+# Outputs a nested list
 ```
 
-## How do infection rates relate to mobility trends, by country?   
+Extracting slopes: 
 
-Fitting a linear model to see how mobility changed as infection rate changed in each country:  
-```{r}
-
-# This creates nested lists:  
-lm_by_country_lists <- d %>% 
-  split(.$country) %>% 
-  map(~lm(total_mob ~ total_cases, data = .))
-
-# let's see what it looks like: 
-head(lm_by_country_lists)
-
-# Extracting the slopes: 
+```{r }
 slopes <- lm_by_country_lists %>%
     map(coef) %>%
     map_dbl(2)
 slopes
+```
 
-# Plotting linear models: 
-# This is one way. But how to do it by looping through lm_by_country_lists rather than facet wrapping? 
+We could also plot each lm: 
+
+```{r}
+ 
+# Using pmap? 
+
+# By facet wrapping?   
 ggplot(d, aes(x = total_cases, y = total_mob)) + 
   geom_point() +
   stat_smooth(method = "lm", col = "red") +
@@ -149,15 +154,59 @@ ggplot(d, aes(x = total_cases, y = total_mob)) +
 
 ```
 
+### Writing functions: an example
+Writing a function to extract coefs from linear models of change in mobility by change in infection rates. 
+
+```{r}
+
+# first: create new column "model" with lm data, total mobility by total cases 
+mods_tmp <- d %>%
+    group_by(country) %>%
+    nest() %>%
+    mutate(model = map(data, ~lm(total_mob ~ total_cases, data = .x)))
+mods_tmp
+
+# create function to return all coefficients: 
+pull_coef <- function(model) {
+    coefs <- coef(model)
+    data.frame(coefficient = names(coefs),
+               estimate    = coefs)
+}
+
+# now we can use that function to create new column coefs:  
+mods_tmp %>%
+    mutate(coefs = map(model, pull_coef))
+
+# unnest coefs column to see data: 
+mods_tmp %>%
+    mutate(coefs = map(model, pull_coef)) %>%
+    unnest(coefs)
+
+# tidy up: 
+mods_tmp %>%
+    mutate(coefs = map(model, pull_coef)) %>%
+    select(country, coefs) %>%
+    unnest(coefs)
+
+# further tidying, and arrange by intercept: 
+mods_tmp %>%
+    mutate(coefs = map(model, pull_coef)) %>%
+    select(country, coefs) %>%
+    unnest(coefs) %>%
+    pivot_wider(names_from = "coefficient", 
+                values_from = "estimate") %>% 
+  arrange(`(Intercept)`)
+
+# now, let's use the function we created to pull coefs for each mobility category, not just total_mob. 
+
+
+```
 
 
 
 
 
-
-
-
-```{r playing w/code}
+```{r playing w/code, echo=FALSE, results='hide'}
 
 # OR, a different approach, returns data frame: 
 lm_by_country_df <- split(d, d$country) %>%

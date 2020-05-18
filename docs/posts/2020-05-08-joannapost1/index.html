@@ -50,7 +50,7 @@
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["joannapost1_files/bowser-1.9.3/bowser.min.js","joannapost1_files/distill-2.2.21/template.v2.js","joannapost1_files/figure-html5/adding unique title to each plot with country name-1.png","joannapost1_files/figure-html5/adding unique title to each plot with country name-2.png","joannapost1_files/figure-html5/collapsing mobility across place categories-1.png","joannapost1_files/figure-html5/collapsing mobility across place categories-2.png","joannapost1_files/figure-html5/collapsing mobility across place categories-3.png","joannapost1_files/figure-html5/how mobility relates to infection rates-1.png","joannapost1_files/figure-html5/how mobility relates to infection rates-2.png","joannapost1_files/figure-html5/how mobility relates to infection rates-3.png","joannapost1_files/figure-html5/how mobility relates to infection rates-4.png","joannapost1_files/figure-html5/trying out parallel iteration, parks mobility trends-1.png","joannapost1_files/figure-html5/trying out parallel iteration, parks mobility trends-2.png","joannapost1_files/jquery-1.11.3/jquery.min.js","joannapost1_files/webcomponents-2.0.0/webcomponents.js"]}
+  {"type":"character","attributes":{},"value":["joannapost1_files/bowser-1.9.3/bowser.min.js","joannapost1_files/distill-2.2.21/template.v2.js","joannapost1_files/figure-html5/adding unique title to each plot with country name-1.png","joannapost1_files/figure-html5/adding unique title to each plot with country name-2.png","joannapost1_files/figure-html5/collapsing mobility across place categories-1.png","joannapost1_files/figure-html5/collapsing mobility across place categories-2.png","joannapost1_files/figure-html5/collapsing mobility across place categories-3.png","joannapost1_files/figure-html5/how mobility relates to infection rates-1.png","joannapost1_files/figure-html5/how mobility relates to infection rates-2.png","joannapost1_files/figure-html5/how mobility relates to infection rates-3.png","joannapost1_files/figure-html5/how mobility relates to infection rates-4.png","joannapost1_files/figure-html5/parallel iteration, workplaces mobility trends for each country-1.png","joannapost1_files/figure-html5/parallel iteration, workplaces mobility trends for each country-2.png","joannapost1_files/figure-html5/trying out parallel iteration, parks mobility trends-1.png","joannapost1_files/figure-html5/trying out parallel iteration, parks mobility trends-2.png","joannapost1_files/figure-html5/unnamed-chunk-2-1.png","joannapost1_files/figure-html5/unnamed-chunk-4-1.png","joannapost1_files/figure-html5/unnamed-chunk-5-1.png","joannapost1_files/jquery-1.11.3/jquery.min.js","joannapost1_files/webcomponents-2.0.0/webcomponents.js"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 
@@ -1313,106 +1313,168 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <div class="d-article">
-<p>This post describes examples of iteration and parallel iteraction to loop through a data set to extract particular information and create plots. It also demonstrates the use of writing functions.</p>
-<p>I used these libraries:</p>
+<p>This post describes examples of iteration and parallel iteration to loop through a data set to extract particular information and create plots. It also demonstrates the use of writing functions.</p>
+<h2 id="set-up">Set-up</h2>
 <div class="layout-chunk" data-layout="l-body">
-<pre><code>
-[1] &quot;/Users/joannawright/Desktop/EDLD 610 Spring 2020/funprog_blog/data/google_new.csv&quot;</code></pre>
+
 </div>
+<aside>
+Libraries for this post
+</aside>
 <div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+library(ggplot2)
+library(tidyverse)
+library(glue)
+library(janitor)
+library(purrr)</code></pre>
+</div>
+<p>Here’s how I loaded the data. For details on loading data, see <a href="link%20here">Brock’s post</a>.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+files &lt;- list.files(here::here(&quot;data&quot;),
+                    full.names = TRUE)
+files
+d &lt;- read_csv(files[1]) %&gt;%
+  clean_names()</code></pre>
+</div>
+<h2 id="plot-iteration-mobility-trends-by-country">Plot iteration: mobility trends by country</h2>
+<p>Let’s say we want to create a separate plot for mobility trends in each country. For this example, let’s start with one category - workplaces. First, we need to <code>group_by</code> country and <code>nest()</code> the rest of the data. This creates a list of tibbles, one for each country. I’ve called <code>head()</code> here so that we can see what the first few rows look like.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+d %&gt;%
+  group_by(country) %&gt;% 
+  nest() %&gt;%
+  head()</code></pre>
+<pre><code>
+# A tibble: 6 x 2
+# Groups:   country [6]
+  country   data              
+  &lt;chr&gt;     &lt;list&gt;            
+1 Argentina &lt;tibble [43 × 10]&gt;
+2 Australia &lt;tibble [43 × 10]&gt;
+3 Brazil    &lt;tibble [43 × 10]&gt;
+4 Canada    &lt;tibble [43 × 10]&gt;
+5 Germany   &lt;tibble [43 × 10]&gt;
+6 Spain     &lt;tibble [43 × 10]&gt;</code></pre>
+</div>
+<p>Now we can use this as the input for our plots. <code>pmap()</code> is a variation of <code>map()</code> which allows us to apply a function to multiple vectors simultaneously.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+plots_workplaces &lt;- d %&gt;%
+  group_by(country) %&gt;% 
+  nest() %&gt;% 
+  mutate(plots = pmap(list(country, data),  
+                      ~ggplot(..2, aes(date, workplaces)) +
+                        geom_point() + 
+                        geom_line()))
+
+# test to see what a couple look like:
+plots_workplaces$plots[1]</code></pre>
 <pre><code>
 [[1]]</code></pre>
-<p><img src="joannapost1_files/figure-html5/trying%20out%20parallel%20iteration,%20parks%20mobility%20trends-1.png" width="624" /></p>
+<p><img src="joannapost1_files/figure-html5/parallel%20iteration,%20workplaces%20mobility%20trends%20for%20each%20country-1.png" width="624" /></p>
+<pre class="r"><code>
+plots_workplaces$plots[2]</code></pre>
 <pre><code>
 [[1]]</code></pre>
-<p><img src="joannapost1_files/figure-html5/trying%20out%20parallel%20iteration,%20parks%20mobility%20trends-2.png" width="624" /></p>
+<p><img src="joannapost1_files/figure-html5/parallel%20iteration,%20workplaces%20mobility%20trends%20for%20each%20country-2.png" width="624" /></p>
 </div>
+<p>To add a unique title to each plot, use <code>{..1}</code> to select the 1st column, countries, to insert country names into the title.</p>
 <div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+# adding labels and unique title: 
+plots_workplaces1 &lt;- d %&gt;%
+  group_by(country) %&gt;% 
+    nest() %&gt;%
+    mutate(plots = pmap(list(country, data),
+    ~ggplot(..2, aes(date, workplaces)) +
+      geom_point() + 
+      geom_line() + 
+      labs(title = glue(&quot;Mobility trends for workplaces in {..1}&quot;),
+           x = &quot;Date&quot;, 
+           y = &quot;% change&quot;)))
+
+# testing: 
+plots_workplaces1$plots[1]</code></pre>
 <pre><code>
 [[1]]</code></pre>
 <p><img src="joannapost1_files/figure-html5/adding%20unique%20title%20to%20each%20plot%20with%20country%20name-1.png" width="624" /></p>
+<pre class="r"><code>
+plots_workplaces1$plots[2]</code></pre>
 <pre><code>
 [[1]]</code></pre>
 <p><img src="joannapost1_files/figure-html5/adding%20unique%20title%20to%20each%20plot%20with%20country%20name-2.png" width="624" /></p>
 </div>
+<p>To apply the same strategy to see mobility trends by country as a whole, rather than per category, collapse category columns to create a new <code>total_mob</code> column, and then follow the code structure above to plot:</p>
 <div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+d &lt;- d %&gt;%
+  mutate(total_mob = rowSums(.[4:9]))
+
+plots_allplaces &lt;- d %&gt;%
+  group_by(country) %&gt;% 
+    nest() %&gt;%
+    mutate(plots = pmap(list(country, data),
+    ~ggplot(..2, aes(date, total_mob)) +
+      geom_point() + 
+      geom_line() + 
+      labs(title = glue(&quot;Overal mobility trends in {..1}&quot;),
+           x = &quot;Date&quot;, 
+           y = &quot;% change&quot;)))
+
+plots_allplaces$plots[1]</code></pre>
+<pre><code>
+[[1]]</code></pre>
 <p><img src="joannapost1_files/figure-html5/collapsing%20mobility%20across%20place%20categories-1.png" width="624" /></p>
+<pre class="r"><code>
+plots_allplaces$plots[10]</code></pre>
 <pre><code>
 [[1]]</code></pre>
 <p><img src="joannapost1_files/figure-html5/collapsing%20mobility%20across%20place%20categories-2.png" width="624" /></p>
-<pre><code>
-[[1]]</code></pre>
-<p><img src="joannapost1_files/figure-html5/collapsing%20mobility%20across%20place%20categories-3.png" width="624" /></p>
 </div>
+<h2 id="how-do-infection-rates-relate-to-mobility-trends-by-country">How do infection rates relate to mobility trends, by country?</h2>
+<p>Fitting a linear model to see how mobility changed as infection rate changed in each country:</p>
 <div class="layout-chunk" data-layout="l-body">
-<p><img src="joannapost1_files/figure-html5/how%20mobility%20relates%20to%20infection%20rates-1.png" width="624" /></p>
-<pre><code>
-Call:
-lm(formula = total_mob ~ total_cases, data = d)
-
-Residuals:
-    Min      1Q  Median      3Q     Max 
--302.76  -85.94   46.89   81.65  419.47 
-
-Coefficients:
-              Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept) -6.924e+01  4.115e+00  -16.83   &lt;2e-16 ***
-total_cases -1.546e-03  1.232e-04  -12.55   &lt;2e-16 ***
----
-Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-
-Residual standard error: 111.4 on 815 degrees of freedom
-Multiple R-squared:  0.1619,    Adjusted R-squared:  0.1609 
-F-statistic: 157.4 on 1 and 815 DF,  p-value: &lt; 2.2e-16</code></pre>
-<p><img src="joannapost1_files/figure-html5/how%20mobility%20relates%20to%20infection%20rates-2.png" width="624" /><img src="joannapost1_files/figure-html5/how%20mobility%20relates%20to%20infection%20rates-3.png" width="624" /><img src="joannapost1_files/figure-html5/how%20mobility%20relates%20to%20infection%20rates-4.png" width="624" /></p>
+<pre class="r"><code>
+lm_by_country_lists &lt;- d %&gt;% 
+  split(.$country) %&gt;% # split into separate tbl for each country
+  map(~lm(total_mob ~ total_cases, data = .)) # for each tbl, fit lm
+# Outputs a nested list</code></pre>
 </div>
+<p>Extracting slopes:</p>
 <div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+slopes &lt;- lm_by_country_lists %&gt;%
+    map(coef) %&gt;%
+    map_dbl(2)
+slopes</code></pre>
 <pre><code>
      Argentina      Australia         Brazil         Canada 
-    0.55013614     0.95259622     0.49314031     0.61587542 
+ -0.2686061900  -0.0407332748  -0.0256942545  -0.0187354215 
         France        Germany          India      Indonesia 
-    0.54629081     0.52818111     0.58038260     0.78810498 
+ -0.0046440051  -0.0019222595  -0.1175243759  -0.0965435404 
          Italy          Japan         Mexico   Saudi Arabia 
-    0.64753779     0.06870751     0.70860945     0.70866331 
+ -0.0026268298  -0.0102973090  -0.1309121581  -0.1207866782 
   South Africa    South Korea          Spain         Sweden 
-    0.83868847     0.47184025     0.55416443     0.31856265 
+ -0.1886078405   0.0100835598  -0.0031923185  -0.0107055139 
         Turkey United Kingdom             US 
-    0.52334265     0.72081489     0.59508954 </code></pre>
-<pre><code>
-     Argentina      Australia         Brazil         Canada 
-    0.55013614     0.95259622     0.49314031     0.61587542 
-        France        Germany          India      Indonesia 
-    0.54629081     0.52818111     0.58038260     0.78810498 
-         Italy          Japan         Mexico   Saudi Arabia 
-    0.64753779     0.06870751     0.70860945     0.70866331 
-  South Africa    South Korea          Spain         Sweden 
-    0.83868847     0.47184025     0.55416443     0.31856265 
-        Turkey United Kingdom             US 
-    0.52334265     0.72081489     0.59508954 </code></pre>
-<pre><code>
-$year
-   Length     Class      Mode 
-       38 character character 
+ -0.0123238814  -0.0074965353  -0.0006884208 </code></pre>
+</div>
+<p>We could also plot each lm:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+# Using pmap? 
 
-$term
-   Length     Class      Mode 
-       38 character character 
+# By facet wrapping?   
+ggplot(d, aes(x = total_cases, y = total_mob)) + 
+  geom_point() +
+  stat_smooth(method = &quot;lm&quot;, col = &quot;red&quot;) +
+  facet_wrap(~ country)</code></pre>
+<p><img src="joannapost1_files/figure-html5/unnamed-chunk-5-1.png" width="624" /></p>
+</div>
+<div class="layout-chunk" data-layout="l-body">
 
-$estimate
-     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
--104.0142  -21.2496   -0.1598  -16.9983   -0.0104   18.3051 
-
-$std.error
-     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
- 0.000089  0.002344  1.716891  6.218157 11.244392 23.155534 
-
-$statistic
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
--28.704  -7.705  -4.461  -5.237  -1.633   6.052 
-
-$p.value
-     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
-0.0000000 0.0000000 0.0000025 0.0854754 0.0820805 0.9288029 </code></pre>
 </div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
