@@ -15,6 +15,7 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
 library(here)
+library(usethis)
 ```
 
 # Set up a working directory complete with an Rproject and subfolders. Load data with a function.
@@ -29,6 +30,10 @@ Click on Create Project.
 
 Use the here() function so the results in the path are always relative to our projects root directory.
 
+# Create a new package -------------------------------------------------
+path <- file.path(tempdir(), "mypkg")
+create_package(path)
+
 ## Data from a CSV
 The most common way to get data into R is to store it as a CSV.
 
@@ -37,15 +42,15 @@ base R has a read_csv() command from readr. readr is part of the tidyverse, and 
 ```{r}
 files <- list.files(here::here("data"),
                     full.names = TRUE)
-d <- read_csv(files[1]) %>%
-  clean_names()
-```
 
+d <- read_csv(files[1]) %>%
+  janitor::clean_names()
+```
 
 You can also read a CSV file straight from the Internet via a URL. CSVs should have the file extension .csv.
 
 ```{r load_url}
-url <- "http://some.url.with.data.you.want.csv"
+url <- "https://www.kaggle.com/gustavomodelli/covid-community-measures"
 cool_name <- read_csv(url)
 View(cool_name)
 ```
