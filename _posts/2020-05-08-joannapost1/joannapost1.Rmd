@@ -231,20 +231,5 @@ map(d1_tmp, ~lm_model(.x, d1_tmp[["percent_change"]]))
 
 
 
-```{r playing w/code, echo=FALSE, results='hide'}
-
-# OR, a different approach, returns data frame: 
-lm_by_country_df <- split(d, d$country) %>%
-     map_df(~lm(total_mob ~ total_cases, .x) %>%
-              broom::tidy(),
-            .id = "year")
-
-# summary of data frame:  
-lm_by_country_df %>%
-  map(summary)
-
-```
-
-
 
 
