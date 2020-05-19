@@ -32,7 +32,7 @@ library(purrr)
 ```
 
 
-Here's how I loaded the data. For details on loading data, see [Brock's post](link here).
+Loading the data. For details, see [Brock's post](link here).
 
 ```{r loading the data, results='hide'}
 
@@ -49,18 +49,15 @@ d <- read_csv(files[1]) %>%
 Let's say we want to create a separate plot for mobility trends in each country. For this example, let's start with one category - workplaces. First, we need to `group_by` country and `nest()` the rest of the data. This creates a list of tibbles, one for each country. I've called `head()` here so that we can see what the first few rows look like. 
 
 ```{r}
-
 d %>%
   group_by(country) %>% 
   nest() %>%
   head()
-
 ```
 
 Now we can use this as the input for our plots. `pmap()` is a variation of `map()` which allows us to apply a function to multiple vectors simultaneously.
 
 ```{r parallel iteration, workplaces mobility trends for each country}
-
 plots_workplaces <- d %>%
   group_by(country) %>% 
   nest() %>% 
@@ -72,14 +69,12 @@ plots_workplaces <- d %>%
 # test to see what a couple look like:
 plots_workplaces$plots[1]
 plots_workplaces$plots[2]
-
 ```
 
 To add a unique title to each plot, use `{..1}` to select the 1st column, countries, to insert country names into the title. 
 
 ```{r adding unique title to each plot with country name}
-
-# adding labels and unique title: 
+# adding unique title: 
 plots_workplaces1 <- d %>%
   group_by(country) %>% 
     nest() %>%
@@ -94,13 +89,11 @@ plots_workplaces1 <- d %>%
 # testing: 
 plots_workplaces1$plots[1]
 plots_workplaces1$plots[2]
-
 ```
 
 To apply the same strategy to see mobility trends by country as a whole, rather than per category, collapse category columns to create a new `total_mob` column, and then follow the code structure above to plot: 
 
 ```{r collapsing mobility across place categories}
-
 d <- d %>%
   mutate(total_mob = rowSums(.[4:9]))
 
@@ -117,17 +110,15 @@ plots_allplaces <- d %>%
 
 plots_allplaces$plots[1]
 plots_allplaces$plots[10]
-
 ```
 
 ## How do infection rates relate to mobility trends, by country?   
 Fitting a linear model to see how mobility changed as infection rate changed in each country: 
 
 ```{r results="hide"}
-
 lm_by_country_lists <- d %>% 
   split(.$country) %>% # split into separate tbl for each country
-  map(~lm(total_mob ~ total_cases, data = .)) # for each tbl, fit lm
+  map(~lm(total_mob ~ total_cases, data = .)) # for each, fit lm
 # Outputs a nested list
 ```
 
@@ -154,9 +145,8 @@ ggplot(d, aes(x = total_cases, y = total_mob)) +
 
 ```
 
-### Writing functions: an example
+## Writing functions: Example 1
 Writing a function to extract coefs from linear models of change in mobility by change in infection rates. 
-
 ```{r}
 
 # first: create new column "model" with lm data, total mobility by total cases 
@@ -197,11 +187,46 @@ mods_tmp %>%
                 values_from = "estimate") %>% 
   arrange(`(Intercept)`)
 
-# now, let's use the function we created to pull coefs for each mobility category, not just total_mob. 
+```
+
+## Writing functions: Example 2
+Writing a function to apply a linear model of change in mobility by change in infection; then, iterate this function over each category, in each country.  
+
+```{r}
+
+# here's the new function. It has two arguments, "data" which supplies the dataset, and "outcome", which species the column of interest. In the body of the function, data[[outcome]] is a placeholder - we will specify which outcome we are interested in investigating in this regression.
+
+lm_model <- function(data, outcome) {
+  lm(data[[outcome]] ~ data[["total_cases"]])
+}
+
+# testing it on one category, "parks": 
+lm_model(d, "parks") %>% 
+  return()
+
+# That works for one column at a time. But how would we iterate this function over all categories, in all countries? 
+# To do this, we first need to pivot_longer so that there is one column for categories, and one for percent_change.
+
+d1 <- d %>%
+  pivot_longer(
+    cols = 4:9,
+    names_to = "category",
+    values_to = "percent_change"
+  )
+
+# Then we can group by country and category, and loop through to apply the lm_model() function: 
+
+d1_tmp <- d1 %>%
+  group_by(country, category) %>%
+  nest()
+
+d1_tmp[["data"]]
+ 
+map(d1_tmp, ~lm_model(.x, d1_tmp[["percent_change"]]))
+# NEXT STEP - why is this not working? The problem is in the data argument... .x is not working 
 
 
 ```
-
 
 
 
