@@ -27,6 +27,9 @@ To tackle the outline:
 1) Set up a working directory complete with an Rproject and subfolders - Brock
  
 2) Subsetting data and outputting basic descriptives - Akhila & Stephanie 
+  - Custom functions for means and standard deviation
+  - Rename Akhila's first post - Dataset Descriptives Tutorial
+  - Idea: Subset by week (function to separate dates by incrememnts of 7), location, and country, to get average activity per week in each location.
 
 3) Loop through regression/other stats models to extract plots - Joanna
 
