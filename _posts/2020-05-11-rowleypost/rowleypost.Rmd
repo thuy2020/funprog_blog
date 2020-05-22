@@ -18,28 +18,49 @@ library(here)
 library(usethis)
 ```
 
-# Set up a working directory complete with an Rproject and subfolders. Load data with a function.
+# Set up a working directory complete with an Rproject and subfolders. Load your data with a function.
 
-## Let's get set up!
-We want to keep all our data, analyses, and text in one, self-contained, single folder, called the working directory. RStudio offers a helpful “Projects” interface. Let’s go through the steps for creating an “R Project”.
-
+## The typical way to get set up:
 Start RStudio.
-Under the File menu, click on New Project. Choose New Directory, then New Project.
+Under the File menu, click on New Project. 
+Choose New Directory, then New Project.
 Enter a name for this new folder (or “directory”), and choose a convenient location for it. This will be your working directory for the rest of the day (e.g., ~ /funprog_blog).
 Click on Create Project.
 
-Use the here() function so the results in the path are always relative to our projects root directory.
+We use the here() function so the results in the path are always relative to our projects root directory.
 
-# Create a new package -------------------------------------------------
-path <- file.path(tempdir(), "mypkg")
-create_package(path)
+## Create a new package:
+We want to keep all our data, analyses, and text in one, self-contained, single folder, called the working directory.
+-------------------------------------------------
+
+```{r setting_up}
+# create a temporary directory here
+# we'll use the fs package to do that
+
+# first understand where we are
+here::here()
+
+# then create a temporary directory
+fs::dir_create(here::here("temporary-wd"))
+
+# write a function that does this below (basically)
+usethis::proj_activate(here::here("temporary-wd"))
+
+myproject <- file.path(tempdir(), "mypkg")
+create_package(myproject)
+
+fs::file_create(tempdir(), c("scripts", "data", "plots"))
+```
+
+```{r last-chunk, echo = FALSE}
+fs::dir_delete(here::here("temporary-wd"))
+```
 
 ## Data from a CSV
 The most common way to get data into R is to store it as a CSV.
 
 base R has a read_csv() command from readr. readr is part of the tidyverse, and read_csv() is fast.
-
-```{r}
+```{r load_data}
 files <- list.files(here::here("data"),
                     full.names = TRUE)
 
@@ -50,13 +71,13 @@ d <- read_csv(files[1]) %>%
 You can also read a CSV file straight from the Internet via a URL. CSVs should have the file extension .csv.
 
 ```{r load_url}
-url <- "https://www.kaggle.com/gustavomodelli/covid-community-measures"
-cool_name <- read_csv(url)
-View(cool_name)
+url <- "https://www.kaggle.com/gustavomodelli/covid-community-measures/download"
+covid_data <- read_csv(url)
+View(covid_data)
 ```
 
 To write a data frame to a CSV, use the write_csv() function. By default, the file will be written to the working directory.
-```{r}
+```{r write_data}
 write_csv(data, path = "cool_name.csv")
 ```
 
