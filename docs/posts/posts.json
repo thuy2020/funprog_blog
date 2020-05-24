@@ -1,5 +1,21 @@
 [
   {
+    "path": "posts/2020-05-08-stephaniepost/",
+    "title": "Subset Data and Output Basic Descriptive",
+    "description": "A tutorial on writing functions to group your data and generate basic descriptives.",
+    "author": [
+      {
+        "name": "Stephanie Gluck and Akhila Nekkanti",
+        "url": "https://s-gluck.github.io/funprog_blog"
+      }
+    ],
+    "date": "2020-05-23",
+    "categories": [],
+    "preview": {},
+    "last_modified": "2020-05-23T21:49:32-07:00",
+    "input_file": {}
+  },
+  {
     "path": "posts/2020-05-08-akhilas-first-post/",
     "title": "Akhila's First Post",
     "description": "A short description of the post.",
@@ -12,7 +28,8 @@
     "date": "2020-05-08",
     "categories": [],
     "preview": {},
-    "last_modified": "2020-05-08T11:04:01-07:00"
+    "last_modified": "2020-05-08T11:04:03-07:00",
+    "input_file": {}
   },
   {
     "path": "posts/2020-05-08-joannapost1/",
@@ -26,23 +43,9 @@
     ],
     "date": "2020-05-08",
     "categories": [],
-    "preview": "posts/2020-05-08-joannapost1/joannapost1_files/figure-html5/parallel iteration, workplaces mobility trends for each country-1.png",
-    "last_modified": "2020-05-18T15:27:04-07:00"
-  },
-  {
-    "path": "posts/2020-05-08-stephaniepost/",
-    "title": "stephanie_post",
-    "description": "A short description of the post.",
-    "author": [
-      {
-        "name": "Nora Jones",
-        "url": "https://example.com/norajones"
-      }
-    ],
-    "date": "2020-05-08",
-    "categories": [],
     "preview": {},
-    "last_modified": "2020-05-08T11:10:21-07:00"
+    "last_modified": "2020-05-19T13:12:09-07:00",
+    "input_file": {}
   },
   {
     "path": "posts/welcome/",
@@ -57,6 +60,7 @@
     "date": "2020-05-08",
     "categories": [],
     "preview": {},
-    "last_modified": "2020-05-08T14:58:41-07:00"
+    "last_modified": "2020-05-09T23:02:11-07:00",
+    "input_file": {}
   }
 ]

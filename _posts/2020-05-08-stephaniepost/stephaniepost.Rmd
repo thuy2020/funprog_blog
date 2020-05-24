@@ -1,26 +1,28 @@
 ---
-title: "stephanie_post"
+title: "Subset Data and Output Basic Descriptive"
 description: |
-  A short description of the post.
+  A tutorial on writing functions to group your data and generate basic descriptives. 
 author:
-  - name: Nora Jones
-    url: https://example.com/norajones
-date: 05-08-2020
+  - name: Stephanie Gluck and Akhila Nekkanti
+    url: https://s-gluck.github.io/funprog_blog
+date: 05-23-2020
 output:
   distill::distill_article:
     self_contained: false
 ---
 
-```{r setup, include= TRUE}
-knitr::opts_chunk$set(echo = FALSE)
+```{r setup, include= FALSE}
 
-
+library(tidyverse)
+library(glue)
+library(janitor)
+library(purrr)
+library(reactable)
 
 ```
 
 To create a new page on your blog 
 `distill::create_post("post_title")`
-
 
 To tackle the outline: 
 
@@ -35,9 +37,97 @@ To tackle the outline:
 
 4) Creating folders to export plots with meaningful paramters (e.g., names, plot dimensions) - Akhila & Stephanie 
 
+Data:
+https://www.kaggle.com/gustavomodelli/covid-community-measures
+
+More info about the data: 
+https://support.google.com/covid19-mobility/answer/9824897?hl=en&ref_topic=9822927
 
 
-Distill is a publication format for scientific and technical writing, native to the web.
+# Introduction 
 
-Learn more about using Distill at <https://rstudio.github.io/distill>.
+For this tutorial, we will use the [COVID Community Measures](https://www.kaggle.com/gustavomodelli/covid-community-measures) dataset from Kaggle. The dataset contains Community Mobility Reports describing community activities in a variety of seeting from Google and the incidence of COVID-19 diagnosis and fatalities from John Hopkins CSSE. 
+
+
+Here is how the data looks like: 
+
+
+```{r, echo = FALSE}
+
+files <- list.files(here::here("data"),
+                    full.names = TRUE)
+
+d <- read_csv(files[1]) %>%
+  clean_names()
+
+reactable(d,  
+          height = 500, 
+          striped = TRUE, 
+          compact = TRUE, 
+          outlined = TRUE)
+
+```
+
+
+The data contains the following variables: 
+
+```{r variable_names, echo = TRUE}
+
+names(d)
+
+```
+
+from the following countries: 
+
+```{r countries, echo = TRUE }
+#base R method
+#table(d$country)
+
+#using tidyverse
+d %>% count(country, sort = TRUE)
+```
+
+
+
+```{r, eval = FALSE}
+listof_fun <- list(
+  n = function(x) length(x),
+  n_valid = function(x) sum(!is.na(x)),
+  mean = function(x) mean(x, na.rm = TRUE),
+  sd = function(x) sd(x, na.rm = TRUE),
+  min = function(x) min(x, na.rm = TRUE),
+  max = function(x) max(x, na.rm = TRUE)
+)
+
+
+smry_function <- function(df, outcome, ..., .fun = list(n = function(x) length(x),
+                                             n_valid = function(x) sum(!is.na(x)),
+                                             mean = function(x) mean(x),
+                                             sd = function(x) sd(x),
+                                             min = function(x) min(x),
+                                             max = function(x) max(x))) {
+  df %>% 
+    group_by(...) %>% 
+    summarise_at(vars({{outcome}}), .funs = .fun)
+}
+
+smry_function(iris, Sepal.Width, Species)
+
+
+
+smry_function2 <- function(df, outcome, ..., .fun = listof_fun
+) {
+  library(dplyr)
+  df %>% 
+    group_by(...) %>% 
+    summarise_at(vars({{outcome}}), .funs = .fun)
+}
+
+smry_function2(iris, Sepal.Width, Species)
+
+smry_function2(airquality, Ozone, Month)
+
+
+
+```
 
