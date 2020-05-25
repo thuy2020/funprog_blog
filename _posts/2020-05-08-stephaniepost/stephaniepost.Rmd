@@ -9,17 +9,23 @@ date: 05-23-2020
 output:
   distill::distill_article:
     self_contained: false
+    toc: true
+    toc_depth: 2
 ---
 
 ```{r setup, include= FALSE}
 
 library(tidyverse)
+library(lubridate)
 library(glue)
 library(janitor)
 library(purrr)
 library(reactable)
 
 ```
+
+# Project Notes
+### This section will be deleted or moved for final version
 
 To create a new page on your blog 
 `distill::create_post("post_title")`
@@ -46,8 +52,26 @@ https://support.google.com/covid19-mobility/answer/9824897?hl=en&ref_topic=98229
 
 # Introduction 
 
-For this tutorial, we will use the [COVID Community Measures](https://www.kaggle.com/gustavomodelli/covid-community-measures) dataset from Kaggle. The dataset contains Community Mobility Reports describing community activities in a variety of seeting from Google and the incidence of COVID-19 diagnosis and fatalities from John Hopkins CSSE. 
+For the tutorial, we will use the [COVID Community Measures](https://www.kaggle.com/gustavomodelli/covid-community-measures) dataset from Kaggle. We hope that you will be able to generalize the function we covered to be applicable to your own dataset. The current dataset contains Community Mobility Reports describing community activities in a variety of setting from Google and the incidence of COVID-19 diagnosis and fatalities from John Hopkins CSSE. 
 
+Community activities is defined as the change in activity from the baseline days. A baseline day is the median value from the 5‑week period between January 3rd to February 6th, 2020. 
+
+
+## Loading the Data 
+
+Here are the packages used in our tutorial: 
+
+```{r, echo = TRUE}
+
+#list the packages that readers need for tutorial when finish with post
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(purrr)
+
+```
+
+Our blog also includes a post on how to automate your data loading. [You can check out the post here](insert link to Brock's Post)
 
 Here is how the data looks like: 
 
@@ -87,9 +111,62 @@ from the following countries:
 d %>% count(country, sort = TRUE)
 ```
 
+# Function Tutorial 
+
+## Subsetting Data 
 
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, echo = TRUE}
+
+#Stephanie comment: MAJOR work in progress!!!! I eval = F and echo = T for now, need to fix later
+
+str(d)
+
+d_split <- split(d, d$country)
+
+d_split[[1]]$country
+
+
+map(d_split, ~map_chr(.x$country, ))
+
+
+pokemon <- map(pokes, ~map_chr(.x$pokemon, ~.x$pokemon$name))
+
+map_chr(d_split, d_split[[.x]]$country)
+
+map(d_split, list("country")) %>% 
+  map_chr(country)
+
+country_names <- map_chr(d_split, ~(.x$country))
+country_names
+
+
+ability <- map_chr(abs, "name")
+
+#extract length for 1 list
+length(abs[[1]]$pokemon)
+
+#convert into map 
+count <- map(abs, list("pokemon")) %>% 
+  map_dbl(~length(.x))
+
+#another way to coutn # of pokemon with each ability: 
+map_dbl(abs, ~length(.x$pokemon))
+
+#create tibble 
+tibble(Ability = str_to_title(ability), 
+              `Number of Pokemon` = count)
+
+```
+
+## Function for General Descriptives
+
+```{r, eval = FALSE, echo = TRUE}
+
+#function from lab 4 incase is helpful for our tutorial
+#I eval = F and echo = T for now, need to fix later
+
+
 listof_fun <- list(
   n = function(x) length(x),
   n_valid = function(x) sum(!is.na(x)),
