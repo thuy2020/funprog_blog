@@ -49,6 +49,22 @@ https://www.kaggle.com/gustavomodelli/covid-community-measures
 More info about the data: 
 https://support.google.com/covid19-mobility/answer/9824897?hl=en&ref_topic=9822927
 
+**Class Requirement**
+No code is used repetitively (no more than twice) [10 points]
+
+More than one variant of purrr::map is used [10 points]
+
+At least one {purrr} function outside the basic map family (walk_*, reduce, modify_*, etc.) [10 points]
+
+At least one instance of parallel iteration (e.g., map2_*, pmap_*) [10 points]
+
+At least one use case of purrr::nest %>% mutate() [10 points]
+
+At least two custom functions [20 points; 10 points each]
+   - Each function must do exactly one thing
+   - The functions may replicate the behavior of a base function - as noted above this is about practicing the skills you learn in class
+
+
 
 # Introduction 
 
@@ -116,6 +132,18 @@ d %>% count(country, sort = TRUE)
 ## Subsetting Data 
 
 
+```{r}
+#add day of week column and a week category column in order to split by 7 days interval. Label = TRUE will print actual day of the week, e.g., Sunday (1)
+
+d <- d %>% 
+  mutate(week = cut(date, "week", start.on.monday = FALSE, labels = FALSE), 
+         day_of_week = wday(date, label = TRUE))
+
+```
+
+
+
+
 ```{r, eval = FALSE, echo = TRUE}
 
 #Stephanie comment: MAJOR work in progress!!!! I eval = F and echo = T for now, need to fix later
@@ -125,6 +153,18 @@ str(d)
 d_split <- split(d, d$country)
 
 d_split[[1]]$country
+
+d_split2 <- d %>%
+    nest(-country)
+d_split2 
+
+str(d_split2$data)
+
+map_dbl(d_split2$data, nrow)
+
+map_dbl(d_split2$data, ncol)
+
+map_dbl(d_split2$data, ~mean(.x$residential))
 
 
 map(d_split, ~map_chr(.x$country, ))
