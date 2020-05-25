@@ -7,3 +7,19 @@ description: |
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
+
+Welcome to our class project blog. This blog was created as part of the final project for EDUC610 [
+Functional Programming with R
+](https://uo-datasci-specialization.github.io/c3-fun_program2020/index.html) taught by [Daniel Anderson](https://github.com/datalorax) at the University of Oregon. The blog contains tutorial type guides on the basic of writing function in R to automate your data workflow and analysis. 
+
+The authors of the blog are: 
+
+[Stephanie Gluck](https://github.com/s-gluck)
+
+[Akhila Nekkanti](https://github.com/akhilanekkanti1) 
+
+[Brock Rowley](https://github.com/RowleyBrock) 
+
+[Joanna Wright](https://github.com/jhwrigh23) 
+
+
