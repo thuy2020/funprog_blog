@@ -1,9 +1,9 @@
 ---
-title: "Subset Data and Output Basic Descriptive"
+title: "How to Subset Data and Output Basic Descriptives"
 description: |
-  A tutorial on writing functions to group your data and generate basic descriptives. 
+  A tutorial on writing a function to group your data and generate basic descriptives. 
 author:
-  - name: Stephanie Gluck and Akhila Nekkanti
+  - name: Stephanie Gluck & Akhila Nekkanti
     url: https://s-gluck.github.io/funprog_blog
 date: 05-23-2020
 output:
@@ -68,9 +68,9 @@ At least two custom functions [20 points; 10 points each]
 
 # Introduction 
 
-For the tutorial, we will use the [COVID Community Measures](https://www.kaggle.com/gustavomodelli/covid-community-measures) dataset from Kaggle. We hope that you will be able to generalize the function we covered to be applicable to your own dataset. The current dataset contains Community Mobility Reports describing community activities in a variety of setting from Google and the incidence of COVID-19 diagnosis and fatalities from John Hopkins CSSE. 
+For the tutorial, we will use the [COVID Community Measures](https://www.kaggle.com/gustavomodelli/covid-community-measures) dataset from Kaggle. We hope that you will be able to generalize the function we covered to be applicable to your own dataset. The current dataset contains Community Mobility Reports describing community activities in a variety of settings from Google and the incidence of COVID-19 diagnosis and fatalities from John Hopkins CSSE. 
 
-Community activities is defined as the change in activity from the baseline days. A baseline day is the median value from the 5‑week period between January 3rd to February 6th, 2020. 
+Community activity is defined as the change in activity from the baseline days. A baseline day is the median value from the 5‑week period between January 3rd to February 6th, 2020. 
 
 
 ## Loading the Data 
@@ -79,8 +79,9 @@ Here are the packages used in our tutorial:
 
 ```{r, echo = TRUE}
 
-#list the packages that readers need for tutorial when finish with post
-library(tidyverse)
+#list the packages that readers need for tutorial when finish with post 
+#consider specifying which tools from each package we will need. 
+library(tidyverse) 
 library(janitor)
 library(lubridate)
 library(purrr)
@@ -205,6 +206,40 @@ tibble(Ability = str_to_title(ability),
 
 #function from lab 4 incase is helpful for our tutorial
 #I eval = F and echo = T for now, need to fix later
+
+##Latest version of function 5/25 - akhila
+
+
+descriptives <- function(df, outcome, ..., .fun = list(n = function(x) length(x),
+                                             n_valid = function(x) sum(!is.na(x)),
+                                             n_missing = function(x) sum(is.na(x)),
+                                             mean = function(x) mean(x, na.rm = TRUE),
+                                             sd = function(x) sd(x, na.rm = TRUE),
+                                             min = function(x) min(x, na.rm = TRUE),
+                                             max = function(x) max(x, na.rm = TRUE))) {
+  library(dplyr)
+  df_name <- deparse(substitute(df))
+  outcome_name <- deparse(substitute(outcome))
+            if(!is.data.frame(df)) { 
+              
+               stop(df_name, " is not a data frame")
+            } 
+  
+            if(!is.numeric(pull(df, {{outcome}}))) {  ## only works with {{ }}
+              
+               stop(outcome_name, " is not numeric")
+            }
+  
+            if(is.numeric(pull(df, ...))) {
+              
+              warning(" Grouping variables are not categorical")
+            }
+ 
+  df %>% 
+    group_by(...) %>%  ##doesn't work with {{ }}
+    summarise_at(vars({{outcome}}), 
+                 .funs = .fun)
+}
 
 
 listof_fun <- list(
