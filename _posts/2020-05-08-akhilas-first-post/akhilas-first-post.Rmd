@@ -11,11 +11,358 @@ output:
     self_contained: false
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+
+
+```{r setup, include= FALSE}
+
+library(tidyverse)
+library(lubridate)
+library(glue)
+library(janitor)
+library(purrr)
+library(reactable)
+
 ```
 
-Distill is a publication format for scientific and technical writing, native to the web.
+# Project Notes
+### This section will be deleted or moved for final version
 
-Learn more about using Distill at <https://rstudio.github.io/distill>.
+To create a new page on your blog 
+`distill::create_post("post_title")`
+
+To tackle the outline: 
+
+1) Set up a working directory complete with an Rproject and subfolders - Brock
+ 
+2) Subsetting data and outputting basic descriptives - Akhila & Stephanie 
+  - Custom functions for means and standard deviation
+  - Rename Akhila's first post - Dataset Descriptives Tutorial
+  - Idea: Subset by week (function to separate dates by incrememnts of 7), location, and country, to get average activity per week in each location.
+
+3) Loop through regression/other stats models to extract plots - Joanna
+
+4) Creating folders to export plots with meaningful paramters (e.g., names, plot dimensions) - Akhila & Stephanie 
+
+Data:
+https://www.kaggle.com/gustavomodelli/covid-community-measures
+
+More info about the data: 
+https://support.google.com/covid19-mobility/answer/9824897?hl=en&ref_topic=9822927
+
+**Class Requirement**
+No code is used repetitively (no more than twice) [10 points]
+
+More than one variant of purrr::map is used [10 points]
+
+At least one {purrr} function outside the basic map family (walk_*, reduce, modify_*, etc.) [10 points]
+
+At least one instance of parallel iteration (e.g., map2_*, pmap_*) [10 points]
+
+At least one use case of purrr::nest %>% mutate() [10 points]
+
+At least two custom functions [20 points; 10 points each]
+   - Each function must do exactly one thing
+   - The functions may replicate the behavior of a base function - as noted above this is about practicing the skills you learn in class
+
+
+
+# Introduction 
+
+For the tutorial, we will use the [COVID Community Measures](https://www.kaggle.com/gustavomodelli/covid-community-measures) dataset from Kaggle. We hope that you will be able to generalize the function we covered to be applicable to your own dataset. The current dataset contains Community Mobility Reports describing community activities in a variety of settings from Google and the incidence of COVID-19 diagnosis and fatalities from John Hopkins CSSE. 
+
+Community activity is defined as the change in activity from the baseline days. A baseline day is the median value from the 5‑week period between January 3rd to February 6th, 2020. 
+
+
+## Loading the Data 
+
+Here are the packages used in our tutorial: 
+
+```{r, echo = TRUE}
+
+#list the packages that readers need for tutorial when finish with post 
+#consider specifying which tools from each package we will need. 
+library(tidyverse) 
+library(janitor)
+library(lubridate)
+library(purrr)
+
+```
+
+Our blog also includes a post on how to automate your data loading. [You can check out the post here](insert link to Brock's Post)
+
+Here is how the data looks like: 
+
+
+```{r, echo = FALSE}
+
+files <- list.files(here::here("data"),
+                    full.names = TRUE)
+
+d <- read_csv(files[1]) %>%
+  clean_names()
+
+#consider changing width in code chunk to see whole table,
+reactable(d,  
+          height = 500,
+          striped = TRUE, 
+          compact = TRUE, 
+          outlined = TRUE)
+
+#gt not suitable here
+# library(gt)
+# gt(d)
+
+```
+
+
+The data contains the following variables: 
+
+```{r variable_names, echo = TRUE}
+
+names(d)
+
+```
+
+from the following countries: 
+
+```{r countries, echo = TRUE }
+#base R method
+#table(d$country)
+
+#using tidyverse
+d %>% count(country, sort = TRUE)
+```
+
+# Function Tutorial 
+
+## Subsetting Data 
+
+
+```{r}
+#add day of week column and a week category column in order to split by 7 days interval. Label = TRUE will print actual day of the week, e.g., Sunday (1)
+
+#uses lubridate
+
+d <- d %>% 
+  mutate(week = cut(date, "week", start.on.monday = FALSE, labels = FALSE), 
+         day_of_week = wday(date, label = TRUE))
+
+View(d)
+```
+
+
+#EXPLAIN WHAT NESTING DOES. HOW TO CHOOSE WHICH VARIABLES TO NEST BY. 
+
+```{r, eval = FALSE, echo = TRUE}
+
+#Stephanie comment: MAJOR work in progress!!!! I eval = F and echo = T for now, need to fix later
+
+str(d)
+
+# d_split <- split(d, d$country)
+
+# d_split[[1]]$country
+
+#week 7 only has one day  -- filter our here if it becomes a problem
+d_split2 <- d %>%
+    nest(-country, -week)
+View(d_split2) 
+
+# str(d_split2$data)
+
+#checking how length of variables
+map_dbl(d_split2$data, nrow)
+
+map_dbl(d_split2$data, ncol)
+
+#if you want to find the mean for just one random column, by each country and week
+map_dbl(d_split2$data, ~mean(.x$residential))
+
+#################################################################################################3reference code, not directly applicable atm
+pokemon <- map(pokes, ~map_chr(.x$pokemon, ~.x$pokemon$name))
+
+map_chr(d_split, d_split[[.x]]$country)
+
+map(d_split, list("country")) %>% 
+  map_chr(country)
+
+country_names <- map_chr(d_split, ~(.x$country))
+country_names
+
+
+ability <- map_chr(abs, "name")
+
+#extract length for 1 list
+length(abs[[1]]$pokemon)
+
+#convert into map 
+count <- map(abs, list("pokemon")) %>% 
+  map_dbl(~length(.x))
+
+#another way to coutn # of pokemon with each ability: 
+map_dbl(abs, ~length(.x$pokemon))
+
+#create tibble 
+tibble(Ability = str_to_title(ability), 
+              `Number of Pokemon` = count)
+
+```
+
+## Function for General Descriptives
+
+```{r, eval = FALSE, echo = TRUE}
+#extract one
+mean(d2$data[[1]]$residential)
+
+
+means <- d2 %>% 
+  mutate(mean = map(data, ~mean(.x$residential)))
+
+
+means35 <- d2 %>% 
+   map_dbl(data, ~mean(.x))
+
+View(means35)
+
+#function from lab 4 incase is helpful for our tutorial
+#I eval = F and echo = T for now, need to fix later
+
+##Latest version of function 5/25 - akhila
+
+try1 <- function(df){
+  
+  df_num <- as.numeric(df)
+  
+	means <- purrr::map_dbl(df_num, mean, na.rm = TRUE)
+	sds <- purrr::map_dbl(df_num, sd, na.rm = TRUE)
+	
+		if(as_tibble) {
+		tbl <- tibble::tibble(variable = names(df_num),
+		                      mean = means,
+		                      sd = sds)
+	} else {
+		tbl <- data.frame(variable = names(df_num),
+		                  mean = means,
+		                  sd = sds)
+	}
+	tbl
+}
+
+
+try1(d_split2)
+
+
+try2 <- function(df){
+  df_num <- as.numeric(df)
+	means <- purrr::map(df_num, mean, na.rm = TRUE)
+	sds <- purrr::map_dbl(df_num, sd, na.rm = TRUE)
+}
+
+
+
+d2 <- d %>% 
+  group_by(country, week) %>% 
+  nest()
+  
+means <- d2 %>% 
+  mutate(mean = map(data, mean(data$residential))
+
+
+mean1 <- d %>%
+  group_by(country, week) %>% 
+  nest() %>% 
+  mutate(means = pmap(list(country, week, data),  
+                      ~mean(..1, na.rm = TRUE)))
+
+
+
+View(mean1)
+
+
+
+descriptives <- function(df, outcome, .fun = list(n = function(x) length(x),
+                                             mean = function(x) mean(x, na.rm = TRUE),
+                                             sd = function(x) sd(x, na.rm = TRUE),
+                                             min = function(x) min(x, na.rm = TRUE),
+                                             max = function(x) max(x, na.rm = TRUE))) {
+
+ 
+  df %>% 
+    summarise_at(vars({{outcome}}), 
+                 .funs = .fun)
+}
+
+
+d %>% 
+  group_by(country, week) %>% 
+  descriptives(c(residential, workplaces))
+
+
+descriptives(d, residential)
+
+
+
+
+
+df_summary <- function(df, as_tibble = TRUE) {
+	df_num <- df_numeric(df)
+	means <- purrr::map_dbl(df_num, my_mean)
+	sds <- purrr::map_dbl(df_num, sd, na.rm = TRUE)
+
+	if(as_tibble) {
+		tbl <- tibble::tibble(variable = names(df_num),
+		                      mean = means,
+		                      sd = sds)
+	} else {
+		tbl <- data.frame(variable = names(df_num),
+		                  mean = means,
+		                  sd = sds)
+	}
+	tbl
+}
+df_summary(iris)
+df_summary(forcats::gss_cat)
+
+############################
+
+listof_fun <- list(
+  n = function(x) length(x),
+  n_valid = function(x) sum(!is.na(x)),
+  mean = function(x) mean(x, na.rm = TRUE),
+  sd = function(x) sd(x, na.rm = TRUE),
+  min = function(x) min(x, na.rm = TRUE),
+  max = function(x) max(x, na.rm = TRUE)
+)
+
+
+smry_function <- function(df, outcome, ..., .fun = list(n = function(x) length(x),
+                                             n_valid = function(x) sum(!is.na(x)),
+                                             mean = function(x) mean(x),
+                                             sd = function(x) sd(x),
+                                             min = function(x) min(x),
+                                             max = function(x) max(x))) {
+  df %>% 
+    group_by(...) %>% 
+    summarise_at(vars({{outcome}}), .funs = .fun)
+}
+
+smry_function(iris, Sepal.Width, Species)
+
+
+
+smry_function2 <- function(df, outcome, ..., .fun = listof_fun
+) {
+  library(dplyr)
+  df %>% 
+    group_by(...) %>% 
+    summarise_at(vars({{outcome}}), .funs = .fun)
+}
+
+smry_function2(iris, Sepal.Width, Species)
+
+smry_function2(airquality, Ozone, Month)
+
+
+
+```
 
