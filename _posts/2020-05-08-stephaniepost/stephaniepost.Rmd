@@ -77,7 +77,7 @@ Community activity is defined as the change in activity from the baseline days. 
 ## Loading the Data 
 ### Please refer to our blogpost on how to automate your data loading. [You can check out the post here](insert link to Brock's Post)
 
-To create a function that can read in our dataframe and output descriptives, we will need the following packages. If you have not already isntalled them, please use install.packages(" ") prior to calling library(). 
+To create a function that can read in our dataframe and output descriptives, we will need the following packages. If you have not already isntalled them, please use `install.packages(" ")` prior to calling `library()`. 
 
 ```{r, echo = TRUE, eval = FALSE}
 
@@ -90,7 +90,7 @@ library(purrr)
 ```
 
 
-Once the data is loaded, we can look at the dataframe by using reactable(). Notice that you can sort each column by clicking on the column header.
+Once the data is loaded, we can look at the dataframe by using `reactable()`. Notice that you can sort each column by clicking on the column header.
 
 ```{r, echo = FALSE}
 
@@ -114,7 +114,7 @@ reactable(d,
 ```
 
 
-We can also look at each of the variable names by calling names().
+We can also look at each of the variable names by calling the R base function `names()`.
 
 ```{r variable_names, echo = TRUE}
 
@@ -138,26 +138,31 @@ d %>%
 
 ## Subsetting Data 
 
-For this dataset, it would be helpful to create a 'week' variable that extracts each day of the week, so we can group our descriptives by week. Here, we've also created a  'day_of_week'variable to double-check our work. 
+For this dataset, it would be helpful to create a 'week' variable that extracts each day of the week, so we can group our descriptives by week which would allow us to examine for example the average change in activities across weeks for different settings. Here, we've also created a 'day_of_week'variable to double-check our work. 
+
+If you are working with date-time variables in your data, the [lubridate]("https://lubridate.tidyverse.org/) package is quite powerful at manipulating date-time data. 
 
 ```{r echo = TRUE}
-#Label = TRUE will print actual day of the week, e.g., Sunday (1)
+#cut.Date, labels = TRUE will print actual day of the week, e.g., Sunday (1)
 
-#uses lubridate
+#use lubridate wday and base R cut.Date
+
+#?cut.Date
+#?wday
 
 d <- d %>% 
-  mutate(week = cut(date, "week", start.on.monday = FALSE, labels = FALSE), 
+  mutate(week = cut.Date(date, "week", start.on.monday = FALSE, labels = FALSE), 
          day_of_week = wday(date, label = TRUE))
 head(d)
 
 ```
 
 
-Now that we've created our week variable, we can group our dataset by week, by country, or both. This will allow us to loop our function through each grouping variable and provide unique descriptives for each. 
+Now that we've created our week variable, we can use `tidyr::nest` to group our dataset by week, by country, or both. This will allow us to loop our function through each grouping variable and provide unique descriptives for each. 
+
+We will nest our data by the variables `country` and `week` 
 
 ```{r}
-
-
 #week 7 only has one day  -- filter out here if it becomes a problem
 
 d2 <- d %>%
@@ -166,9 +171,21 @@ d2 <- d %>%
 
 print(d2)
 
+```
 
-# str(d_split2$data)
+After nesting, you see that our new dataframe now contains a list-column named `data`. We can call the Argentina Week 1 data tibble to look at it in more details. 
 
+```{r}
+
+d2$data[[1]]
+
+```
+
+You can see that inside the 7 x 11 tibble for Argentina week 1, the community activities, diagnosis and fatalities data from that week (week of February 23 to February 29, 2020) are listed. 
+
+We can also perform other functions to check our nested dataframe
+
+```{r}
 #checking how length of variables
 map_dbl(d2$data, nrow)
 
@@ -176,8 +193,6 @@ map_dbl(d2$data, ncol)
 
 #if you want to find the mean for just one random column, by each country and week
 map_dbl(d2$data, ~mean(.x$residential))
-
-
 
 ```
 
@@ -187,11 +202,11 @@ map_dbl(d2$data, ~mean(.x$residential))
 
 In order to figure out how to create a function that can be used for any variable in a dataset, we first need to do it for one. 
 
-* 'mean' is a base R function.
-* 'd2' is our nested data set.
-* 'data' is a dataframe that contains all our other variables, for each country and week. You'll notice there's a different dataset for Argentina week1, Argentina week2, and so on.
-* '[[1]]' says: give me the contents within data
-* '$residential' specifies which variable within data we are interested in.
+* `mean` is a base R function.
+* `d2` is our nested data set.
+* `data` is a dataframe that contains all our other variables, for each country and week. You'll notice there's a different dataset for Argentina week1, Argentina week2, and so on.
+* `[[1]]` says: give me the contents within data
+* `$residential` specifies which variable within data we are interested in.
 
 ```{r, eval = TRUE, echo = TRUE}
 
@@ -223,11 +238,23 @@ means_c_w <- d2 %>%
   select(-data) %>% 
   unnest(means)
 
+#this works at returning the mean for all numeric variable, but is not pretty and also loses the labels for country
+test <- d2$data %>% map(~ map_dbl(.x, mean))
+test[[1]]
+
+
+#this only works for mean of a specific variable in the nested list (e.g., residential)
+test2 <- d2 %>% 
+  mutate(mean_sd = map(data, 
+                     ~map_dfc(lst(mean, sd), 
+                               function(.fun) .fun(.x$residential)))) %>% 
+  unnest(mean_sd)
+test2
 ```
 
 ## General Descriptives with Anonymous Function
 
-```{r, eval = FALSE, echo = TRUE}
+```{r, eval = TRUE, echo = TRUE}
 
 
 
