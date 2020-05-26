@@ -124,7 +124,7 @@ NEED TO TROUBLESHOOT:
 tmp_plots <- plot_fun(d, parks, time, country)
 
 # When we assign object and try to view a plot, it doesn't work. Error message says object 'parks' not found. Why? 
-tmp_plots$plots[[2]]
+tmp_plots$plots[2]
 
 ```
 
