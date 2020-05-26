@@ -1,9 +1,9 @@
 ---
-title: "Subset Data and Output Basic Descriptive"
+title: "How to Subset Data and Output Basic Descriptives"
 description: |
-  A tutorial on writing functions to group your data and generate basic descriptives. 
+  A tutorial on writing a function to group your data and generate basic descriptives. 
 author:
-  - name: Stephanie Gluck and Akhila Nekkanti
+  - name: Stephanie Gluck & Akhila Nekkanti
     url: https://s-gluck.github.io/funprog_blog
 date: 05-23-2020
 output:
@@ -14,6 +14,7 @@ output:
 ---
 
 ```{r setup, include= FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
 library(lubridate)
@@ -68,29 +69,28 @@ At least two custom functions [20 points; 10 points each]
 
 # Introduction 
 
-For the tutorial, we will use the [COVID Community Measures](https://www.kaggle.com/gustavomodelli/covid-community-measures) dataset from Kaggle. We hope that you will be able to generalize the function we covered to be applicable to your own dataset. The current dataset contains Community Mobility Reports describing community activities in a variety of setting from Google and the incidence of COVID-19 diagnosis and fatalities from John Hopkins CSSE. 
+For the tutorial, we will use the [COVID Community Measures](https://www.kaggle.com/gustavomodelli/covid-community-measures) dataset from Kaggle. We hope that you will be able to generalize the function we covered to be applicable to your own dataset. The current dataset contains Community Mobility Reports describing community activities in a variety of settings from Google and the incidence of COVID-19 diagnosis and fatalities from John Hopkins CSSE. 
 
-Community activities is defined as the change in activity from the baseline days. A baseline day is the median value from the 5‑week period between January 3rd to February 6th, 2020. 
+Community activity is defined as the change in activity from the baseline days. A baseline day is the median value from the 5‑week period between January 3rd to February 6th, 2020. 
 
 
 ## Loading the Data 
+### Please refer to our blogpost on how to automate your data loading. [You can check out the post here](insert link to Brock's Post)
 
-Here are the packages used in our tutorial: 
+To create a function that can read in our dataframe and output descriptives, we will need the following packages. If you have not already isntalled them, please use `install.packages(" ")` prior to calling `library()`. 
 
-```{r, echo = TRUE}
+```{r, echo = TRUE, eval = FALSE}
 
-#list the packages that readers need for tutorial when finish with post
-library(tidyverse)
+#At later time, identify what aspects of each library are used for the function
+library(tidyverse) 
 library(janitor)
 library(lubridate)
 library(purrr)
 
 ```
 
-Our blog also includes a post on how to automate your data loading. [You can check out the post here](insert link to Brock's Post)
 
-Here is how the data looks like: 
-
+Once the data is loaded, we can look at the dataframe by using `reactable()`. Notice that you can sort each column by clicking on the column header.
 
 ```{r, echo = FALSE}
 
@@ -100,16 +100,21 @@ files <- list.files(here::here("data"),
 d <- read_csv(files[1]) %>%
   clean_names()
 
+#consider changing width in code chunk to see whole table,
 reactable(d,  
-          height = 500, 
+          height = 500,
           striped = TRUE, 
           compact = TRUE, 
           outlined = TRUE)
 
+#gt not suitable here
+# library(gt)
+# gt(d)
+
 ```
 
 
-The data contains the following variables: 
+We can also look at each of the variable names by calling the R base function `names()`.
 
 ```{r variable_names, echo = TRUE}
 
@@ -117,132 +122,164 @@ names(d)
 
 ```
 
-from the following countries: 
+& we can look at all the different countries:
 
 ```{r countries, echo = TRUE }
-#base R method
-#table(d$country)
 
 #using tidyverse
-d %>% count(country, sort = TRUE)
+
+d %>% 
+  count(country, 
+        sort = TRUE)
+
 ```
 
 # Function Tutorial 
 
 ## Subsetting Data 
 
+For this dataset, it would be helpful to create a 'week' variable that extracts each day of the week, so we can group our descriptives by week which would allow us to examine for example the average change in activities across weeks for different settings. Here, we've also created a 'day_of_week'variable to double-check our work. 
 
-```{r}
-#add day of week column and a week category column in order to split by 7 days interval. Label = TRUE will print actual day of the week, e.g., Sunday (1)
+If you are working with date-time variables in your data, the [lubridate]("https://lubridate.tidyverse.org/) package is quite powerful at manipulating date-time data. 
+
+```{r echo = TRUE}
+#cut.Date, labels = TRUE will print actual day of the week, e.g., Sunday (1)
+
+#use lubridate wday and base R cut.Date
+
+#?cut.Date
+#?wday
 
 d <- d %>% 
-  mutate(week = cut(date, "week", start.on.monday = FALSE, labels = FALSE), 
+  mutate(week = cut.Date(date, "week", start.on.monday = FALSE, labels = FALSE), 
          day_of_week = wday(date, label = TRUE))
+head(d)
 
 ```
 
 
+Now that we've created our week variable, we can use `tidyr::nest` to group our dataset by week, by country, or both. This will allow us to loop our function through each grouping variable and provide unique descriptives for each. 
 
+We will nest our data by the variables `country` and `week` 
 
-```{r, eval = FALSE, echo = TRUE}
+```{r}
+#week 7 only has one day  -- filter out here if it becomes a problem
 
-#Stephanie comment: MAJOR work in progress!!!! I eval = F and echo = T for now, need to fix later
+d2 <- d %>%
+  group_by(country, week) %>% 
+  nest()
 
-str(d)
-
-d_split <- split(d, d$country)
-
-d_split[[1]]$country
-
-d_split2 <- d %>%
-    nest(-country)
-d_split2 
-
-str(d_split2$data)
-
-map_dbl(d_split2$data, nrow)
-
-map_dbl(d_split2$data, ncol)
-
-map_dbl(d_split2$data, ~mean(.x$residential))
-
-
-map(d_split, ~map_chr(.x$country, ))
-
-
-pokemon <- map(pokes, ~map_chr(.x$pokemon, ~.x$pokemon$name))
-
-map_chr(d_split, d_split[[.x]]$country)
-
-map(d_split, list("country")) %>% 
-  map_chr(country)
-
-country_names <- map_chr(d_split, ~(.x$country))
-country_names
-
-
-ability <- map_chr(abs, "name")
-
-#extract length for 1 list
-length(abs[[1]]$pokemon)
-
-#convert into map 
-count <- map(abs, list("pokemon")) %>% 
-  map_dbl(~length(.x))
-
-#another way to coutn # of pokemon with each ability: 
-map_dbl(abs, ~length(.x$pokemon))
-
-#create tibble 
-tibble(Ability = str_to_title(ability), 
-              `Number of Pokemon` = count)
+print(d2)
 
 ```
 
-## Function for General Descriptives
+After nesting, you see that our new dataframe now contains a list-column named `data`. We can call the Argentina Week 1 data tibble to look at it in more details. 
 
-```{r, eval = FALSE, echo = TRUE}
+```{r}
 
-#function from lab 4 incase is helpful for our tutorial
-#I eval = F and echo = T for now, need to fix later
+d2$data[[1]]
+
+```
+
+You can see that inside the 7 x 11 tibble for Argentina week 1, the community activities, diagnosis and fatalities data from that week (week of February 23 to February 29, 2020) are listed. 
+
+We can also perform other functions to check our nested dataframe
+
+```{r}
+#checking how length of variables
+map_dbl(d2$data, nrow)
+
+map_dbl(d2$data, ncol)
+
+#if you want to find the mean for just one random column, by each country and week
+map_dbl(d2$data, ~mean(.x$residential))
+
+```
+
+## General Descriptives with purrr:map
+
+### The functions we have so far are not ideal - need to be cleaned up to be generalized across all numeric columns in a dataset
+
+In order to figure out how to create a function that can be used for any variable in a dataset, we first need to do it for one. 
+
+* `mean` is a base R function.
+* `d2` is our nested data set.
+* `data` is a dataframe that contains all our other variables, for each country and week. You'll notice there's a different dataset for Argentina week1, Argentina week2, and so on.
+* `[[1]]` says: give me the contents within data
+* `$residential` specifies which variable within data we are interested in.
+
+```{r, eval = TRUE, echo = TRUE}
+
+mean(d2$data[[1]]$residential)
+
+```
+
+Next, we can attempt to loop through each cell in the 'data' column (that is, grouped by country and week) to find the residential means for each.
+
+```{r, eval = TRUE, echo = TRUE}
+
+residential_mean <- d2 %>% 
+  mutate(mean = map(data, ~mean(.x$residential))) %>% 
+  unnest(mean)
+
+print(residential_mean)
+
+```
 
 
-listof_fun <- list(
-  n = function(x) length(x),
-  n_valid = function(x) sum(!is.na(x)),
-  mean = function(x) mean(x, na.rm = TRUE),
-  sd = function(x) sd(x, na.rm = TRUE),
-  min = function(x) min(x, na.rm = TRUE),
-  max = function(x) max(x, na.rm = TRUE)
-)
+Finally, we can generalize this further to loop through each cell in the data column, to get the mean for each variable (not just residential).
+
+```{r error = TRUE}
+
+####Feedback would be appreciated about how to use map to loop through each numeric column within the nested data (d2)
+
+means_c_w <- d2 %>%
+  mutate(means = map(d2$data, ~mean(data = .x))) %>% 
+  select(-data) %>% 
+  unnest(means)
+
+#this works at returning the mean for all numeric variable, but is not pretty and also loses the labels for country
+test <- d2$data %>% map(~ map_dbl(.x, mean))
+test[[1]]
 
 
-smry_function <- function(df, outcome, ..., .fun = list(n = function(x) length(x),
-                                             n_valid = function(x) sum(!is.na(x)),
-                                             mean = function(x) mean(x),
-                                             sd = function(x) sd(x),
-                                             min = function(x) min(x),
-                                             max = function(x) max(x))) {
+#this only works for mean of a specific variable in the nested list (e.g., residential)
+test2 <- d2 %>% 
+  mutate(mean_sd = map(data, 
+                     ~map_dfc(lst(mean, sd), 
+                               function(.fun) .fun(.x$residential)))) %>% 
+  unnest(mean_sd)
+test2
+```
+
+## General Descriptives with Anonymous Function
+
+```{r, eval = TRUE, echo = TRUE}
+
+
+
+descriptives <- function(df, outcome, .fun = list(n = function(x) length(x),
+                                             mean = function(x) mean(x, na.rm = TRUE),
+                                             sd = function(x) sd(x, na.rm = TRUE),
+                                             min = function(x) min(x, na.rm = TRUE),
+                                             max = function(x) max(x, na.rm = TRUE))) {
+
+ 
   df %>% 
-    group_by(...) %>% 
-    summarise_at(vars({{outcome}}), .funs = .fun)
+    summarise_at(vars({{outcome}}), 
+                 .funs = .fun)
 }
 
-smry_function(iris, Sepal.Width, Species)
 
+#specify which variables to group by to get descriptives AND which variables you want descriptives for
 
+d %>% 
+  group_by(country, week) %>% 
+  descriptives(c(residential, workplaces))
 
-smry_function2 <- function(df, outcome, ..., .fun = listof_fun
-) {
-  library(dplyr)
-  df %>% 
-    group_by(...) %>% 
-    summarise_at(vars({{outcome}}), .funs = .fun)
-}
+#this also works
 
-smry_function2(iris, Sepal.Width, Species)
-
-smry_function2(airquality, Ozone, Month)
+descriptives(d, residential)
 
 
 
