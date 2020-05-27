@@ -16,6 +16,22 @@
     "input_file": "stephaniepost.utf8.md"
   },
   {
+    "path": "posts/2020-05-11-blog_post_one/",
+    "title": "GettingStarted_Post",
+    "description": "We are getting started with setting up a project, working directory, subfolders, and loading data.",
+    "author": [
+      {
+        "name": "Brock Rowley",
+        "url": "https://example.com/norajones"
+      }
+    ],
+    "date": "2020-05-11",
+    "categories": [],
+    "preview": {},
+    "last_modified": "2020-05-27T11:30:42-07:00",
+    "input_file": "blog_post_one.utf8.md"
+  },
+  {
     "path": "posts/2020-05-08-akhilas-first-post/",
     "title": "Akhila's First Post",
     "description": "A short description of the post.",
