@@ -26,7 +26,6 @@ Libraries for this post
 ```{r}
 library(ggplot2)
 library(tidyverse)
-library(glue)
 library(janitor)
 library(purrr)
 ```
@@ -58,6 +57,7 @@ d %>%
 Now we can use this as the input for our plots. `pmap()` is a variation of `map()` which allows us to apply a function to multiple vectors simultaneously.
 
 ```{r parallel iteration, workplaces mobility trends for each country}
+
 plots_workplaces <- d %>%
   group_by(country) %>% 
   nest() %>% 
@@ -69,11 +69,15 @@ plots_workplaces <- d %>%
 # test to see what a couple look like:
 plots_workplaces$plots[1]
 plots_workplaces$plots[2]
+
+# or we could see all of them: 
+# plots_workplaces$plots[1:19]
 ```
 
-To add a unique title to each plot, use `{..1}` to select the 1st column, countries, to insert country names into the title. 
+To add a unique title to each plot, use `{..1}` to select the 1st column, country, to insert country names into the title. 
 
 ```{r adding unique title to each plot with country name}
+
 # adding unique title: 
 plots_workplaces1 <- d %>%
   group_by(country) %>% 
@@ -82,117 +86,93 @@ plots_workplaces1 <- d %>%
     ~ggplot(..2, aes(date, workplaces)) +
       geom_point() + 
       geom_line() + 
-      labs(title = glue("Mobility trends for workplaces in {..1}"),
+      labs(title = paste("Mobility trends for workplaces in {..1}"),
            x = "Date", 
            y = "% change")))
 
 # testing: 
 plots_workplaces1$plots[1]
 plots_workplaces1$plots[2]
+
+# or we could see all of them: 
+# plots_workplaces1$plots[1:19]
 ```
 
-Now that we've figured out how to loop through the data set to create plots that group by a variable (in this case, country), with an x-axis (in this case, time) and an outcome on the y-axis, let's generalize this with a function. Our function will have 4 arguments: the data frame, the y-axis variable, the x-axis variable, and the grouping variable. 
+So far, we've looked at mobility trends in one particular category (workplaces), for each country. 
+Now let's generalize this with a function that we could apply to any selection of mobility categories (rather than just workplaces). 
 
-```{r}
+Our function will have 2 arguments: the data frame, and the mobility category. The x-axis variable, time, will remain the same, so it is supplied in the body of the function rather than as an argument. 
 
-# THIS WORKS, DON'T CHANGE FOR NOW
-plot_fun <- function(df, outcome, x_axis, group_var) {
-df %>%
-  group_by({{group_var}}) %>% 
-    nest() %>%
-    mutate(plots = pmap(list({{group_var}}, data),
-    ~ggplot(..2, aes(x_axis, outcome)) +
+```{r function for creating plots }
+
+# assign nested data as object: 
+by_country <- d %>%
+  group_by(country) %>% 
+    nest()
+
+# First let's get the plot for just one country (the first one, as selected using by_country$data[[1]]), and one category, parks. 
+
+ggplot(by_country$data[[1]], aes(date, parks)) +
       geom_point() + 
       geom_line() + 
-      labs(title = glue("Overal mobility trends in {..1}"),
+      labs(title = paste("Overal mobility trends in parks"),
            x = "Date", 
-           y = "% change")))
-}
+           y = "% change")
 
-```
-
-Test it out on our data set, for mobility in parks: 
-```{r}
-
-plot_fun(d, parks, time, country)
-
-```
-
-NEED TO TROUBLESHOOT: 
-```{r}
-
-tmp_plots <- plot_fun(d, parks, time, country)
-
-# When we assign object and try to view a plot, it doesn't work. Error message says object 'parks' not found. Why? 
-tmp_plots$plots[2]
-
-```
-
-tmp_plots <- plot_fun(d, parks, time, country)
-
-# But when we assign object and try to view a plot, it doesn't work. Why? 
-tmp_plots$plots[[2]]
-
-Test it out on another data set just to ensure that it indeed generalizes: (although we wouldn't use it this way because the lables are customized for this data set)
-```{r}
-
-plot_fun(gss_cat, tvhours, year, relig)
-
-```
-
-We can see that it's worked because it still gives us output with three columns: the grouping variable, and 2 nested lists, one with tibbles of plot data, and one with the plots we've created. 
-
-Now that it works, we could use this function to explore mobility trends in our data set in different categories by simply exchanging our 'outcome' argument. For example, instead of 'parks' we could look at 'grocery_pharmacy': 
-```{r}
-
-plot_fun(d, grocery_pharmacy, time, country)
-
-```
-
-To see mobility trends by country as a whole, rather than per category, collapse category columns to create a new `total_mob` column, and then use the function we created. 
-```{r}
-
-d1 <- d %>%
-  mutate(total_mob = rowSums(.[4:9]))
-
-plot_fun(d1, total_mob, time, country)
-
-```
-
-Of course, running our plot function gives us a data frame with nested lists as the output, but does not show us the plots themselves. 
-Below, I tried adding return() to the function to return the first plot. I also tried using deparse() to create label inputs, and using these in labs() to have each plot title refer to both the country and the outcome category displayed in that plot. 
-(But the code below doesn't work yet.)
-
-```{r}
-
-plot_fun2 <- function(df, outcome, x_axis, group_var) {
-   outcome_name <- deparse(substitute(outcome))
-   country_name <- deparse(substitute(group_var))
-   plots_tmp <- df %>%
-  group_by({{group_var}}) %>% 
-    nest() %>%
-    mutate(plots = pmap(list({{group_var}}, data),
-    ~ggplot(..2, aes(x_axis, outcome)) +
+# Now generalize to a function: 
+create_plot <- function(df, outcome) {
+  call <- as.character(match.call())
+  ggplot(df, aes(date, {{outcome}})) +
       geom_point() + 
       geom_line() + 
-      labs(title = glue("Mobility trends in ", country_name, "for ", outcome_name),
+      labs(title = paste("Overall mobility trends in", call[3] ), 
            x = "Date", 
-           y = "% change")))
-   return(plots_tmp$plots[1])
+           y = "% change")
 }
 
-# test:
-plot_fun2(d, parks, time, country)
-# returns an error message that object 'parks' not found. Why? 
+create_plot(by_country$data[[1]], parks)
 
+# loop create_plot through the by_country data frame
+
+# map(by_country, ~create_plot(df = by_country, outcome = .x))
+# PROBLEM HERE: WHY? 
+# Error: Aesthetics must be valid data columns. Problematic aesthetic(s): x = date. Did you mistype the name of a data column or forget to add after_stat()?
+
+# once we figure the above out, could assign to plot_list and use walk() to print all plots:  
+# walk(plot_list, print)
 
 ```
 
-## Task 2: How do infection rates relate to mobility trends, by country? 
+```{r function for creating plots, continued}
+
+# Alternative approach: we could restructure the data to have column indicating categories, then nest by country AND category: 
+
+by_country_mobil_cat <- d %>%
+  pivot_longer(
+    cols = 4:9,
+    names_to = "mobil_category",
+    values_to = "perc_change"
+  ) %>%
+  nest(-country, -mobil_category)
+
+# Then loop through data and apply the plotting function we created: 
+
+# by_country_mobil_cat %>%
+# pmap(list(country, mobil_category, data), ~create_plot(df = by_country_mobil_cat, outcome = .x))
+
+# THIS IS CLOSE? But why does the error message say "object 'country' not found"?? 
+
+```
+
+
+## Task 2: How do infection rates relate to mobility trends, by country?
 
 Fitting a linear model to see how mobility changed as infection rate changed in each country: 
 
 ```{r results="hide"}
+
+d1 <- d %>%
+  mutate(total_mob = rowSums(.[4:9]))
 
 lm_by_country_lists <- d1 %>% 
   split(.$country) %>% # split into separate tbl for each country
@@ -211,5 +191,9 @@ slopes
 ```
 
 ## Things to work on:
+
+Resolve bugs in 'function for creating plots' code chunks.
+
 Improve plot visualization 
+
 Repeated use of code? 
