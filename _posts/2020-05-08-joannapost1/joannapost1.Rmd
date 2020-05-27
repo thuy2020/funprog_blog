@@ -1,5 +1,5 @@
 ---
-title: "joanna_post1"
+title: "Post 3"
 description: |
   Description here
 author:
@@ -157,8 +157,8 @@ by_country_mobil_cat <- d %>%
 
 # Then loop through data and apply the plotting function we created: 
 
-# by_country_mobil_cat %>%
-# pmap(list(country, mobil_category, data), ~create_plot(df = by_country_mobil_cat, outcome = .x))
+#by_country_mobil_cat %>%
+#pmap(list(country, mobil_category, data), ~create_plot(df = by_country_mobil_cat, outcome = .x))
 
 # THIS IS CLOSE? But why does the error message say "object 'country' not found"?? 
 
