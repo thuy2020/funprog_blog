@@ -1,0 +1,78 @@
+[
+  {
+    "path": "posts/2020-05-08-stephaniepost/",
+    "title": "How to Subset Data and Output Basic Descriptives",
+    "description": "A tutorial on writing a function to group your data and generate basic descriptives.",
+    "author": [
+      {
+        "name": "Stephanie Gluck & Akhila Nekkanti",
+        "url": "https://s-gluck.github.io/funprog_blog"
+      }
+    ],
+    "date": "2020-05-23",
+    "categories": [],
+    "preview": {},
+    "last_modified": "2020-05-26T13:59:21-07:00"
+  },
+  {
+    "path": "posts/2020-05-11-rowleypost/",
+    "title": "GettingStarted_Post",
+    "description": "We are getting started with setting up a project, working directory, subfolders, and loading data.",
+    "author": [
+      {
+        "name": "Brock Rowley",
+        "url": "https://example.com/norajones"
+      }
+    ],
+    "date": "2020-05-11",
+    "categories": [],
+    "preview": {},
+    "last_modified": "2020-05-27T08:30:21-07:00",
+    "input_file": "rowleypost.utf8.md"
+  },
+  {
+    "path": "posts/2020-05-08-akhilas-first-post/",
+    "title": "Akhila's First Post",
+    "description": "A short description of the post.",
+    "author": [
+      {
+        "name": "Akhila Nekkanti",
+        "url": "https://example.com/norajones"
+      }
+    ],
+    "date": "2020-05-08",
+    "categories": [],
+    "preview": {},
+    "last_modified": "2020-05-08T11:04:01-07:00"
+  },
+  {
+    "path": "posts/2020-05-08-joannapost1/",
+    "title": "joanna_post1",
+    "description": "Description here",
+    "author": [
+      {
+        "name": "Joanna Wright",
+        "url": "https://example.com/norajones"
+      }
+    ],
+    "date": "2020-05-08",
+    "categories": [],
+    "preview": "posts/2020-05-08-joannapost1/joannapost1_files/figure-html5/parallel iteration, workplaces mobility trends for each country-1.png",
+    "last_modified": "2020-05-26T16:47:31-07:00"
+  },
+  {
+    "path": "posts/welcome/",
+    "title": "Welcome to Functional Programming Blog",
+    "description": "Welcome to our new blog, Functional Programming Blog. We hope you enjoy \nreading what we have to say!",
+    "author": [
+      {
+        "name": "Nora Jones",
+        "url": "https://s-gluck.github.io/funprog_blog"
+      }
+    ],
+    "date": "2020-05-08",
+    "categories": [],
+    "preview": {},
+    "last_modified": "2020-05-08T14:58:41-07:00"
+  }
+]

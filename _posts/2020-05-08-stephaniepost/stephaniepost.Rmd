@@ -1,5 +1,5 @@
 ---
-title: "How to Subset Data and Output Basic Descriptives"
+title: "Post 2 - How to Subset Data and Output Basic Descriptives"
 description: |
   A tutorial on writing a function to group your data and generate basic descriptives. 
 author:
@@ -191,7 +191,7 @@ map_dbl(d2$data, nrow)
 
 map_dbl(d2$data, ncol)
 
-#if you want to find the mean for just one random column, by each country and week
+#if you want to find the mean for just one specif column, by each country and week
 map_dbl(d2$data, ~mean(.x$residential))
 
 ```
@@ -244,6 +244,7 @@ test[[1]]
 
 
 #this only works for mean of a specific variable in the nested list (e.g., residential)
+#can't get it to generalize across all the different settings 
 test2 <- d2 %>% 
   mutate(mean_sd = map(data, 
                      ~map_dfc(lst(mean, sd), 
