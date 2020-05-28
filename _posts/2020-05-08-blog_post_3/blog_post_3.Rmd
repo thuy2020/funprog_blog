@@ -27,6 +27,7 @@ Libraries for this post
 library(ggplot2)
 library(tidyverse)
 library(janitor)
+library(glue)
 library(purrr)
 ```
 
@@ -86,7 +87,7 @@ plots_workplaces1 <- d %>%
     ~ggplot(..2, aes(date, workplaces)) +
       geom_point() + 
       geom_line() + 
-      labs(title = paste("Mobility trends for workplaces in {..1}"),
+      labs(title = glue("Mobility trends for workplaces in {..1}"),
            x = "Date", 
            y = "% change")))
 
