@@ -163,6 +163,7 @@ by_country_mobil_cat <- d %>%
 
 # THIS IS CLOSE? But why does the error message say "object 'country' not found"?? 
 
+# Thuy: Hi! I think you just need to rerun d and then rerun this chunk. I was able to run the code chunk to get 3 columms: country, mobil_category and data. 
 ```
 
 

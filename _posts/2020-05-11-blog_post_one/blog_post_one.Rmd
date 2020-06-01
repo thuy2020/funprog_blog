@@ -40,6 +40,9 @@ here::here()
 
 Now that we know the file pathway, this thing: "[1] "/Users/brockrowley/Phd in SPED/2020Spring/funprog_blog" we know where we are (root).
 
+#Thuy: Hi, I'm not sure, but I guess it's a way to link the result of the pathway I run in line 36, and show it down here. I mean I should see: "Now that we know the file pathway, this thing: "[1] "/Users/thuyn/Desktop/EDLD610 data science/funprog_blog", OR anyone who run your code should see their path, instead of your directory, which is "[1] "/Users/brockrowley/Phd in SPED/2020Spring/funprog_blog"
+
+
 # Create a new directory here
 
 We want to keep all our data, analyses, and text in one, self-contained, single folder, called the working directory. We will use the fs package to do this work for us.
@@ -62,6 +65,8 @@ create_setup <- function(dir = getwd()) {
 
 create_setup(here::here("temporary-wd"))
 ```
+
+# Thuy: when I run this code, a new Rstudio session pops up. You may want to comment out line 65 and give the audience a heads up (like what you already prepared below) --> then learners can de-comment it and run :) 
 
 In the code chunk above, we used "temporary-wd" as a placeholder for whatever you want to call your project. If you replace "temporary-wd" with whatever you want to call your project, you will create a new RStudio project, complete with three new folders inside (data, scripts, plots) to get started.
 
